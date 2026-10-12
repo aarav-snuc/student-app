@@ -32,3 +32,8 @@ The application is then available at http://localhost:8081
 
 `Jenkinsfile` defines a four-stage pipeline: Checkout, Build & Test,
 Docker Build, and Deploy.
+
+
+#Note
+
+Search feature under development on feature-search
