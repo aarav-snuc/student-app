@@ -25,4 +25,10 @@ public class StudentStore {
     public int count() {
         return students.size();
     }
+    /** Returns students whose name contains the given text. */
+    public List<String> search(String text) {
+        return students.stream()
+                .filter(s -> s.toLowerCase().contains(text.toLowerCase()))
+                .toList();
+    }
 }
