@@ -1,29 +1,56 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME     = 'student-app'
+        CONTAINER_NAME = 'student-app'
+        HOST_PORT      = '8081'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/aarav-snuc/student-app.git'
+                echo "Building branch: ${env.BRANCH_NAME ?: 'main'}"
+                checkout scm
             }
         }
 
-        stage('Build & Test') {
+        stage('Compile') {
             steps {
-                bat 'mvn clean package'
+                bat 'mvn -B clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'mvn -B test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn -B package -DskipTests'
             }
         }
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t student-app:latest .'
+                bat 'docker build -t %IMAGE_NAME%:latest .'
             }
         }
 
         stage('Deploy') {
+            when {
+                expression { return env.BRANCH_NAME == null || env.BRANCH_NAME == 'main' }
+            }
             steps {
-                bat(script: 'docker rm -f student-app', returnStatus: true)
-                bat 'docker run -d --name student-app -p 8081:8080 student-app:latest'
+                bat(script: 'docker rm -f %CONTAINER_NAME%', returnStatus: true)
+                bat 'docker run -d --name %CONTAINER_NAME% -p %HOST_PORT%:8080 %IMAGE_NAME%:latest'
             }
         }
     }
