@@ -25,4 +25,8 @@ public class StudentStore {
     public int count() {
         return students.size();
     }
+    /** Returns all students as a single comma-separated line. */
+    public String exportAll() {
+        return String.join(", ", students);
+    }
 }
